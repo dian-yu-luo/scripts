@@ -1,3 +1,3 @@
 apt update -y
 apt upgrade -y 
-apt install -y vim emacs procps git ssh sudo 
+apt install -y vim procps git ssh sudo wget
