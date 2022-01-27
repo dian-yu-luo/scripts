@@ -51,7 +51,8 @@
 
 ;; 高亮当前行
 (global-hl-line-mode 1)
-
+;; 保存退出的时候的光标位置
+(save-place-mode 1)
 ;; 缩进问题
 (setq-default tab-width 4)
 ;; 
