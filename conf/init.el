@@ -8,7 +8,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(amx ivy magit evil phi-autopair org-download dashboard dash org company)))
+   '(org-superstar highlight-parentheses amx ivy magit evil phi-autopair org-download dashboard dash org company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -45,8 +45,10 @@
 (dashboard-setup-startup-hook)
 ;; 自动补全括号
 (require 'phi-autopair)
-  (phi-autopair-global-mode)
-
+  (phi-autopair-global-mode )
+(require 'highlight-parentheses)
+(global-highlight-parentheses-mode)
+(show-paren-mode 1)
 
 ;; 光标的模式
 (setq-default cursor-type 'bar)
@@ -70,3 +72,9 @@
 ;; tab 使用4 space 替换
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
+
+
+;; org-superstar
+(require 'org-superstar)
+(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
+(setq org-superstar-headline-bullets-list '("♎" "♌" "☯" "✈" "あ"))
