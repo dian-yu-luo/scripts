@@ -1,21 +1,20 @@
-(setq package-archives '(("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-            ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
-(package-initialize) ;; You might already have this line
-
+(setq package-archives '
+  (
+    ("gnu"   . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
+    ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
+(package-initialize) 
 (custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(org-superstar highlight-parentheses amx ivy magit evil phi-autopair org-download dashboard dash org company)))
+'
+  (package-selected-packages
+'
+    (page-break-lines auto-highlight-symbol org-superstar highlight-parentheses amx ivy magit evil org-download dashboard dash org company)))
 (custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(default ((t (:family "楷体" :foundry "outline" :slant normal :weight normal :height 163 :width normal)))))
- 
+'
+  (default 
+    (
+      (t 
+        (:family "楷体" :foundry "outline" :slant normal :weight normal :height 163 :width normal)))))
+
 ;; 设置行号
 (global-linum-mode 1)
 
@@ -24,28 +23,44 @@
 
 ;; 自动补全模式
 (global-company-mode 1)
-(define-key company-active-map (kbd "C-n") 'company-select-next)
-(define-key company-active-map (kbd "C-p") 'company-select-previous)
+(define-key company-active-map 
+  (kbd "C-n") 'company-select-next)
+(define-key company-active-map 
+  (kbd "C-p") 'company-select-previous)
 
-;; 因为有了git 不需要备份文件
+;; 自动备份
 (setq make-backup-files nil)
 
 ;; 停止自动保存
 (setq create-lockfiles nil)
 
 ;; 屏幕启动最大化
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
+(add-to-list 'default-frame-alist '
+  (fullscreen . maximized))
 
 ;; 配置函数 M-x open-init-file之后打开本文件
-(defun open-init-file()
+(defun open-init-file
+  ()
   (interactive)
   (find-file "~/.emacs.d/init.el"))
+(unless 
+  (file-exists-p "~/.emacs.d/org_agenda")
+  (make-directory "~/.emacs.d/org_agenda"))
 ;; 启动面板插件，提供常用的文件
 (require 'dashboard)
 (dashboard-setup-startup-hook)
+
+;; 配置agenda文件的扫描位置，默认在这里
+(setq org-agenda-files 
+  (list 
+    (expand-file-name "~/.emacs.d/org_agenda")))
+(setq dashboard-items '
+  (
+    (recents  . 8)
+    (registers . 5)))
+
 ;; 自动补全括号
-(require 'phi-autopair)
-  (phi-autopair-global-mode )
+(electric-pair-mode 1)
 (require 'highlight-parentheses)
 (global-highlight-parentheses-mode)
 (show-paren-mode 1)
@@ -63,18 +78,43 @@
 (ivy-mode 1)
 (amx-mode 1)
 ;; 
-(global-set-key (kbd "<f2>") 'open-init-file)
+(global-set-key 
+  (kbd "<f2>") 'open-init-file)
 
-
+;; 配置vim的配置，同时在插入模式中取消vim快捷键的冲突
+(require 'evil)
+(evil-mode 1)
 (setq evil-disable-insert-state-bindings t)
-     (require 'evil)
-     (evil-mode 1)
 ;; tab 使用4 space 替换
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 
-
-;; org-superstar
+;; org-superstar解决heading的符号问题
 (require 'org-superstar)
-(add-hook 'org-mode-hook (lambda () (org-superstar-mode 1)))
-(setq org-superstar-headline-bullets-list '("♎" "♌" "☯" "✈" "あ"))
+(add-hook 'org-mode-hook 
+  (lambda 
+    () 
+    (org-superstar-mode 1)))
+(setq org-superstar-headline-bullets-list '
+  ("➲" "➱" "➶" "✈" "➢"))
+
+;; 设置TODO项目的关键字补全
+(setq org-todo-keywords
+'
+  (
+    (sequence "TODO(t)" "WAIT(w!)" "|" "DONE(d!)" "CANCELED(c!)")))
+
+;; 在TODO项目解决之后需要写入logbook日志
+(setq org-log-into-drawer t)
+
+;; 修改列表符号的使用
+(defun dianyuluo-org-prettify-symbols
+  ()
+  (setq-local prettify-symbols-alist
+'
+    (
+      ("[X]" . "☑")
+      ("[ ]" . "☐")))
+  (prettify-symbols-mode 1))
+(add-hook 'org-mode-hook 'dianyuluo-org-prettify-symbols)
+
