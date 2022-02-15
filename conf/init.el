@@ -4,17 +4,29 @@
     ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
 (package-initialize) 
 (custom-set-variables
+;; custom-set-variables was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
 '
   (package-selected-packages
 '
-    (page-break-lines auto-highlight-symbol org-superstar highlight-parentheses amx ivy magit evil org-download dashboard dash org company)))
+    (undo-tree page-break-lines auto-highlight-symbol org-superstar highlight-parentheses amx ivy magit evil org-download dashboard dash org company)))
 (custom-set-faces
+;; custom-set-faces was added by Custom.
+;; If you edit it by hand, you could mess it up, so be careful.
+;; Your init file should contain only one such instance.
+;; If there is more than one, they won't work right.
 '
   (default 
     (
       (t 
         (:family "楷体" :foundry "outline" :slant normal :weight normal :height 163 :width normal)))))
 
+;; 自动安装package，依赖于
+(unless package-archive-contents
+  (package-refresh-contents))
+(package-install-selected-packages)
 ;; 设置行号
 (global-linum-mode 1)
 
@@ -82,9 +94,12 @@
   (kbd "<f2>") 'open-init-file)
 
 ;; 配置vim的配置，同时在插入模式中取消vim快捷键的冲突
+(setq evil-disable-insert-state-bindings t)
 (require 'evil)
 (evil-mode 1)
-(setq evil-disable-insert-state-bindings t)
+(setq evil-want-fine-undo t) 
+(global-undo-tree-mode)
+(evil-set-undo-system 'undo-tree)
 ;; tab 使用4 space 替换
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
@@ -118,3 +133,6 @@
   (prettify-symbols-mode 1))
 (add-hook 'org-mode-hook 'dianyuluo-org-prettify-symbols)
 
+(setq-default buffer-file-coding-system 'utf-8-unix)
+(setq-default coding-system-for-read 'utf-8)
+(setq-default coding-system-for-write 'utf-8)
