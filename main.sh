@@ -1,6 +1,8 @@
 #!/bin/bash
 userPath=$HOME
 
+apt update -y &&apt upgrade -y
+
 echo "do you want add a user (Y/N)"
 read isCheck
 if [ -z $isCheck ] || [ $isCheck = y ] || [ $isCheck = Y ]; then
