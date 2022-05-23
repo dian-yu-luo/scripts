@@ -1,7 +1,7 @@
 #!/bin/bash
 userPath=$HOME
 
-apt update -y &&apt upgrade -y
+apt update -y &&apt upgrade -y && apt install vim git -y
 
 echo "do you want add a user (Y/N)"
 read isCheck
