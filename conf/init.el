@@ -1,6 +1,7 @@
+;; -*- lexical-binding: t -*-
 (setq package-archives '(("gnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
                          ("melpa" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
-(package-initialize) 
+(package-initialize)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -14,8 +15,9 @@
  '(highlight-parentheses-background-colors '("light gray" "cyan"))
  '(highlight-parentheses-colors '("honeydew4" "slate gray"))
  '(org-agenda-files
-   '("c:/Users/dianyuluo/AppData/Roaming/.emacs.d/learning/emacs/dairy/dairy.org" "c:/Users/dianyuluo/AppData/Roaming/.emacs.d/learning/emacs/org_agenda/gtd.org" "c:/Users/dianyuluo/AppData/Roaming/.emacs.d/learning/emacs/org_agenda/eureka.org"))
+   '("~/.emacs.d/learning/emacs/org_agenda/gtd.org" "~/.emacs.d/learning/emacs/org_agenda/eureka.org"))
  '(org-ellipsis "  ⇲")
+ '(org-link-file-path-type 'relative)
  '(org-link-frame-setup
    '((vm . vm-visit-folder-other-frame)
      (vm-imap . vm-visit-imap-folder-other-frame)
@@ -23,7 +25,7 @@
      (file . find-file)
      (wl . wl-other-frame)))
  '(package-selected-packages
-   '(valign dap-mode pyim anki-editor math-preview org-sidebar laas org-transclusion org-elp xenops org-fragtog gcmh ace-window deft expand-region names org-latex-impatient avy all-the-icons-dired all-the-icons-ivy-rich all-the-icons python-mode lsp-mode org-remark ox-pandoc highlight-parentheses smartparens pdf-tools counsel key-chord helm-org-rifle ivy-prescient better-jumper markdown-mode sound-wav esup benchmark-init powerline spacemacs-theme org-pomodoro yasnippet cdlatex multiple-cursors sis company-statistics company-prescient auctex projectile-speedbar use-package latex-preview-pane projectile dictionary org-roam-ui org-roam undo-tree page-break-lines auto-highlight-symbol org-superstar amx ivy magit evil org-download dashboard dash org company))
+   '(diff-hl origami format-all consult valign pyim anki-editor math-preview org-sidebar laas org-transclusion org-elp xenops org-fragtog gcmh ace-window deft expand-region names org-latex-impatient avy all-the-icons-dired all-the-icons-ivy-rich all-the-icons python-mode lsp-mode org-remark ox-pandoc highlight-parentheses smartparens pdf-tools counsel key-chord helm-org-rifle ivy-prescient better-jumper markdown-mode sound-wav esup benchmark-init powerline spacemacs-theme org-pomodoro yasnippet cdlatex multiple-cursors sis company-statistics company-prescient auctex projectile-speedbar use-package latex-preview-pane projectile dictionary org-roam-ui org-roam undo-tree page-break-lines auto-highlight-symbol org-superstar ivy magit evil org-download dashboard dash org company))
  '(safe-local-variable-values
    '((eval evil-local-set-key 'normal
            (kbd "o")
@@ -33,8 +35,7 @@
            'quit-window)))
  '(size-indication-mode t)
  '(tool-bar-mode nil)
- '(warning-suppress-log-types '((use-package) (org-roam) (use-package) (comp)))
- '(warning-suppress-types '((amx) (auto-save) (org-roam) (use-package) (comp))))
+ '(warning-suppress-log-types '((use-package) (org-roam) (use-package) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -43,7 +44,7 @@
  '(default ((t (:family "楷体" :foundry "outline" :slant normal :weight normal :height 163 :width normal))))
  '(cursor ((t (:background "gray"))))
  '(highlight-parentheses-highlight ((t (:background "azure"))) t)
- '(org-checkbox ((t (:foreground "red" :background "white" :weight bold))))
+ '(org-checkbox ((t (:foreground "red" :weight bold))))
  '(org-ellipsis ((t (:foreground "SlateBlue1"))))
  '(org-table ((t (:inherit fixed-pitch :foreground "LightSkyBlue" :family "楷体")))))
 ;;自动安装package，依赖于
@@ -53,14 +54,17 @@
 ;;---------------------------------------------------------------------------------------------------------------------------------
 
 ;;---------------------------------------------------------------------------------------------------------------------------------
-
 (defvar dianyuluo-org-roam-mode nil)
-
+(defconst IS-MAC      (eq system-type 'darwin))
+(defconst IS-LINUX    (eq system-type 'gnu/linux))
+(defconst IS-WINDOWS  (memq system-type '(cygwin windows-nt ms-dos)))
+(defconst IS-BSD      (or IS-MAC (eq system-type 'berkeley-unix)))
 ;;---------------------------------------------------------------------------------------------------------------------------------
 ;; 定义字符集
 ;;屏幕启动最大化
 (global-hl-line-mode 1)
-(global-display-line-numbers-mode 1) 
+(blink-cursor-mode 0)
+(global-display-line-numbers-mode 1)
 (global-auto-highlight-symbol-mode 1)
 ;;自动revert
 (global-auto-revert-mode 1)
@@ -82,9 +86,10 @@
 (toggle-frame-fullscreen)
 (setq confirm-kill-processes nil)
 (setq make-backup-files nil)
+(setq bookmark-set-fringe-mark nil)
 ;; 时间设定
 (set-locale-environment "en_US.UTF-8")
-(setq system-time-locale "C") 
+(setq system-time-locale "C")
 (setq help-window-select t)
 ;;停止自动保存
 (setq create-lockfiles nil)
@@ -100,16 +105,27 @@
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 
-(when window-system
+(when (or window-system (daemonp))
+  (add-hook 'server-after-make-frame-hook 'toggle-frame-fullscreen)
   (load-theme 'misterioso)
   (set-fontset-font t 'emoji "Segoe UI Emoji")
   (set-fontset-font t 'symbol "Segoe UI Symbol")
   (setq face-font-rescale-alist '(("楷体" . 1.0) ("Segoe UI Emoji" . 0.78) ("Segoe UI Symbol" . 0.78)))
   (setq temporary-file-directory (file-truename "~/.emacs.d/learning/emacs/Temp"))
-  (setq browse-url-firefox-program "C:/Program Files/Mozilla Firefox/firefox.exe"))
+  )
+
+(when IS-LINUX
+  (load-theme 'spacemacs-light)
+  )
+
 
 (unless window-system
-  (menu-bar-mode -1) 
+  (menu-bar-mode -1)
+  )
+
+
+(when IS-WINDOWS
+  (setq browse-url-firefox-program "C:/Program Files/Mozilla Firefox/firefox.exe")
   )
 
 ;;---------------------------------------------------------------------------------------------------------------------------------
@@ -117,7 +133,7 @@
 (dir-locals-set-class-variables 'keybind1
                                 '((nil . (
                                           (eval . (evil-local-set-key 'normal (kbd "q") 'quit-window))
-                                          (eval . (evil-local-set-key 'normal (kbd "o") 'delete-other-windows)))))) 
+                                          (eval . (evil-local-set-key 'normal (kbd "o") 'delete-other-windows))))))
 
 
 (setq system-lisp-directory ( concat (file-name-directory (directory-file-name data-directory)) "lisp/"))
@@ -142,9 +158,51 @@
 (defun delete-without-kill-ring()
   (interactive)
   (if  (eolp)
-      (delete-char 1)  
+      (delete-char 1)
     (delete-region (point) (line-end-position))))
 (global-set-key (kbd "C-k") 'delete-without-kill-ring)
+
+(defun dian-git-commit-easy-edition (commit-message)
+  ;; 简化版本提交git
+  (interactive "s Message? ")
+  (message "Message, %s" commit-message)
+  (shell-command   (concat "cd " (projectile-acquire-root) " && " "git add \. && " "git commit -m\"" commit-message "\""))
+  )
+
+(defun open-in-browser()
+  "open buffer in browser, unless it is not a file. Then fail silently (ouch)."
+  (interactive)
+  (if (buffer-file-name)
+      (let ((filename (buffer-file-name)))
+        (shell-command (concat "start firefox.exe \"file://" filename "\"")))))
+
+;; 重命名当前文件
+(defun rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let* ((name (buffer-name))
+         (filename (buffer-file-name))
+         (basename (file-name-nondirectory filename)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (read-file-name "New name: " (file-name-directory filename) basename nil basename)))
+        (if (get-buffer new-name)
+            (error "A buffer named '%s' already exists!" new-name)
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)
+          (message "File '%s' successfully renamed to '%s'"
+                   name (file-name-nondirectory new-name)))))))
+
+(defun open-org-files-recursively (dirname)
+  (interactive "D")
+  (mapc #'find-file (directory-files-recursively dirname "\\.org$" nil)))
+
+(defun dian-jump-to-file (file-name  regexp-string)
+  (find-file file-name)
+  (goto-line 1)
+  (search-forward regexp-string))
 
 (defun doom--sudo-file-path (file)
   (let ((host (or (file-remote-p file 'host) "localhost")))
@@ -176,17 +234,25 @@
   (require 'org-agenda)
   (require 'org-capture)
   (setq org-roam-db-location  "~/.emacs.d/orgroamdb/english.db")
-  (setq org-agenda-files '("~/.emacs.d/learning/language/english/org-agenda/gtd.org" 
-                           "~/.emacs.d/learning/language/english/org-agenda/eureka.org"))
   (org-roam-db-autosync-mode))
+
+(defun dianyuluo-org-roam-learning-political-mode()
+  (interactive)
+  (setq org-roam-directory (file-truename "~/.emacs.d/learning/emacs/org_roam/political"))
+  (global-set-key (kbd "C-c i")
+                  '(lambda()
+                     (interactive)
+                     (find-file "~/.emacs.d/learning/emacs/org_roam/political/20220831123050-political_fleet.org")))
+  (setq dianyuluo-org-roam-mode "political")
+  (require 'org-agenda)
+  (require 'org-capture)
+  (setq org-roam-db-location  "~/.emacs.d/orgroamdb/political.db")
+  (org-roam-db-autosync-mode))
+
 
 (defun dianyuluo-org-roam-learning-math-mode()
   (interactive)
   (setq dianyuluo-org-roam-mode "math")
-  (add-hook 'latex-mode-hook 'turn-on-cdlatex) 
-  (add-hook 'org-mode-hook 'org-cdlatex-mode) 
-  (add-hook 'org-mode-hook 'laas-mode) 
-  (add-hook 'org-mode-hook 'org-fragtog-mode) 
   (setq org-roam-directory (file-truename "~/.emacs.d/learning/emacs/org_roam/math"))
   (setq org-roam-db-location  "~/.emacs.d/orgroamdb/math.db")
   (setq org-roam-capture-templates
@@ -194,8 +260,13 @@
            :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+STARTUP: latexpreview\n")
            :unnarrowed t
            :immediate-finish t)))
-  
-  (org-roam-db-autosync-mode))
+
+  (add-hook 'latex-mode-hook 'turn-on-cdlatex)
+  (add-hook 'org-mode-hook 'org-cdlatex-mode)
+  (add-hook 'org-mode-hook 'laas-mode)
+  (add-hook 'org-mode-hook 'org-fragtog-mode)
+  (org-roam-db-autosync-mode)
+  )
 
 (defun dianyuluo-org-roam-learning-408-mode ()
   (interactive)
@@ -237,19 +308,23 @@
   (interactive)
   (shell-command "code ."))
 
+(defun open-current-project-in-vscode()
+  (interactive)
+  (shell-command (concat "code " (projectile-acquire-root))))
+
 (defun open-org-pomodoro-file ()
   (interactive)
-  (find-file "~/.emacs.d/learning/emacs/dairy/pomodoro.org"))
+  (find-file "~/.emacs.d/learning/emacs/diary/pomodoro.org"))
 
 (defun open-org-daily-file ()
   (interactive)
-  (find-file "~/.emacs.d/learning/emacs/dairy/dairy.org"))
+  (find-file "~/.emacs.d/learning/emacs/diary/diary.org"))
 (global-set-key (kbd "C-c i")
                 'open-org-daily-file)
 
 (defun open-org-englis-file ()
   (interactive)
-  (find-file "~/.emacs.d/learning/emacs/dairy/english.org"))
+  (find-file "~/.emacs.d/learning/emacs/diary/english.org"))
 (global-set-key (kbd "C-c e")
                 'open-org-englis-file)
 
@@ -269,7 +344,7 @@
     (if (string-match "\\cc" full-file-name)
         (setq before-file-name-part  (substring (file-name-sans-extension (file-name-nondirectory buffer-file-name)) 0 14))
       (setq before-file-name-part (substring (file-name-sans-extension (file-name-nondirectory buffer-file-name)) 15))))
-  
+
   (setq imagefile (concat "./" before-file-name-part "Image/"))
   (unless (file-exists-p imagefile)
     (make-directory imagefile))
@@ -287,19 +362,31 @@
   (interactive)
   (load-file "~/.emacs.d/init.el"))
 ;;---------------------------------------------------------------------------------------------------------------------------------
-(add-hook 'after-save-hook '(lambda ()
-                              (when ( > (length (file-truename buffer-file-name) ) 30)
-                                (message (file-name-nondirectory buffer-file-name)))
-                              ))  
+(add-hook 'after-save-hook (lambda ()
+                             (when ( > (length (file-truename buffer-file-name) ) 30)
+                               (message (file-name-nondirectory buffer-file-name)))
+                             ))
 ;;---------------------------------------------------------------------------------------------------------------------------------
 
-(setq org-agenda-files
-      '("~/.emacs.d/learning/emacs/org_agenda/gtd.org" 
-        "~/.emacs.d/learning/emacs/org_agenda/eureka.org"))
+(advice-add #'recenter-top-bottom :after  #'(lambda (&rest _)
+                                              (when (eq recenter-last-op 'top)
+                                                (scroll-down-line 1))))
+
+(advice-add 'mark-whole-buffer :before (lambda ()
+                                         (better-jumper-set-jump)
+                                         (setq dian-mark-buffer-set-mark t)))
+
+(advice-add 'indent-region  :after (lambda(&rest _)
+                                     (if  org-src-mode
+                                         (setq dian-mark-buffer-set-mark nil)
+                                       (when dian-mark-buffer-set-mark
+                                         (better-jumper-jump-backward 1)
+                                         (setq dian-mark-buffer-set-mark nil)))))
 
 ;;---------------------------------------------------------------------------------------------------------------------------------
 
-(define-key messages-buffer-mode-map (kbd "C-x C-s") #'ignore)
+;;---------------------------------------------------------------------------------------------------------------------------------
+
 
 
 (use-package evil
@@ -311,17 +398,17 @@
   :init
   (setq evil-disable-insert-state-bindings t)
   (evil-mode 1)
-  (define-key evil-normal-state-map (kbd "TAB") 'org-cycle)      
+  (define-key evil-normal-state-map (kbd "TAB") 'org-cycle)
   (define-key evil-normal-state-map (kbd "C-n") 'evil-next-line)
-  (define-key evil-normal-state-map (kbd "C-p") 'evil-previous-line) 
-  (define-key evil-motion-state-map (kbd "g o") 'evil-avy-goto-char-timer) 
-  (define-key evil-motion-state-map (kbd "g l") 'evil-avy-goto-line) 
-  (define-key evil-motion-state-map (kbd "f") 'evil-avy-goto-char-in-line) 
+  (define-key evil-normal-state-map (kbd "C-p") 'evil-previous-line)
+  (define-key evil-motion-state-map (kbd "g o") 'evil-avy-goto-char-timer)
+  (define-key evil-motion-state-map (kbd "g l") 'evil-avy-goto-line)
+  (define-key evil-motion-state-map (kbd "f") 'evil-avy-goto-char-in-line)
   (define-key evil-normal-state-map (kbd "[ b") 'previous-buffer)
   (define-key evil-normal-state-map (kbd "] b") 'next-buffer)
   (define-key evil-motion-state-map (kbd "[ b") 'previous-buffer)
   (define-key evil-motion-state-map (kbd "] b") 'next-buffer)
-  (setq evil-want-fine-undo t) 
+  (setq evil-want-fine-undo t)
   (evil-set-initial-state 'messages-buffer-mode 'insert)
   (evil-set-initial-state 'dashboard-mode 'insert)
   (evil-set-initial-state 'special-mode 'insert)
@@ -336,19 +423,34 @@
   :bind
   (("C-c d" . 'dashboard-refresh-buffer))
   :config
-  (dashboard-setup-startup-hook)  
-  (defun read-lines (filePath)
+  (dashboard-setup-startup-hook)
+  (defun read-lines (file-path)
     (with-temp-buffer
-      (insert-file-contents filePath)
+      (insert-file-contents file-path)
       (split-string (buffer-string) "\n" t)))
-  (setq dashboard-footer-messages (read-lines "~/.emacs.d/learning/emacs/dairy/tipoftheday.org"))
-  (add-hook 'dashboard-mode-hook 'sis-set-english) 
+  (defun refrash-dashboard-tipofday()
+    (interactive)
+    (let* (
+           (dian-tip-of-day "~/.emacs.d/learning/emacs/diary/tipoftheday.org")
+           (footers (read-lines dian-tip-of-day))
+           (footer (nth (random (length footers)) footers ))
+           (keymap (let ((map (make-sparse-keymap)))
+                     (define-key map [mouse-1]
+                       (lambda (&rest _)
+                         (interactive)
+                         (message footer)
+                         (dian-jump-to-file dian-tip-of-day footer)))
+                     map))
+           )
+      (add-text-properties 0 (length footer) `(keymap ,keymap mouse-face highlight) footer)
+      (setq dashboard-footer-messages (list footer))))
+  (refrash-dashboard-tipofday)
+  (add-hook 'dashboard-mode-hook 'refrash-dashboard-tipofday)
   (setq dashboard-banner-logo-title "hello , dianyuluo")
   (define-key dashboard-mode-map (kbd "t") 'org-todo-list)
   (define-key dashboard-mode-map (kbd "q") 'delete-window)
   ;;  (define-key dashboard-mode-map (kbd "C-k C-k") 'kill-all-buffers)
   (define-key dashboard-mode-map (kbd "/") 'evil-search-forward)
-  (define-key dashboard-mode-map (kbd "C-x C-s") #'ignore)
   (when window-system
     (setq dashboard-set-navigator t)
     ;;    没空改,有空了再说
@@ -412,7 +514,7 @@
                                        (when (bound-and-true-p nyan-mode)
                                          (powerline-raw (list (nyan-create)) face2 'l))))
                             (rhs (list (powerline-raw global-mode-string face2 'r)
-                                       (unless window-system                                                                 
+                                       (unless window-system
                                          (when (eq evil-state 'normal)
                                            (powerline-raw "<N> " face2 'l)))
                                        (when dianyuluo-org-roam-mode
@@ -465,17 +567,16 @@
 
 (use-package yasnippet
   :init
-  (setq yas-triggers-in-field t) 
+  (setq yas-triggers-in-field t)
   :config
   (add-to-list 'yas-snippet-dirs "~/.emacs.d/learning/emacs/snippets")
   (yas-global-mode 1))
 
 
 (use-package better-jumper
-  :if window-system
   :bind
   (("<mouse-4>" . better-jumper-jump-backward)
-   ("<mouse-5>" . better-jumper-jump-forward)) 
+   ("<mouse-5>" . better-jumper-jump-forward))
   :init
   (better-jumper-mode +1)
   :config
@@ -493,15 +594,15 @@
 
 
 (use-package sis
-  :bind
-  (("C-SPC . 'sis-set-other"))
+  :demand t
   :config
   (add-to-list 'sis-context-detectors (lambda (&rest _)
-                                        (when (and (eq major-mode 'org-mode) (org-at-heading-or-item-p)) 
+                                        (when (and (eq major-mode 'org-mode) (org-at-heading-or-item-p))
                                           'other)))
-  (sis-ism-lazyman-config nil t 'w32)
+  (add-hook 'dashboard-mode-hook 'sis-set-english)
+  (add-hook 'org-capture-mode-hook 'sis-set-other)
   (sis-global-respect-mode t)
-  (sis-global-context-mode t)) 
+  (sis-global-context-mode t))
 
 (use-package avy
   :bind
@@ -512,20 +613,13 @@
     (avy-with avy-goto-char
       (avy-jump
        (regexp-quote "[\[(\{]")
-       :beg (line-beginning-position) 
+       :beg (line-beginning-position)
        :end (line-end-position)))
     (right-char))
   (defun my-avy--regex-candidates (fun regex &optional beg end pred group)
     (let ((regex (pyim-cregexp-build regex)))
       (funcall fun regex beg end pred group)))
   (advice-add 'avy--regex-candidates :around #'my-avy--regex-candidates))
-
-
-
-(use-package amx
-  :ensure t
-  :init 
-  (amx-mode 1))
 
 
 (use-package lsp
@@ -554,6 +648,13 @@
   :defer t
   :config)
 
+(use-package bind-key
+  :config
+  (define-key messages-buffer-mode-map (kbd "C-x C-s") #'ignore)
+  (define-key dashboard-mode-map (kbd "C-x C-s") #'ignore)
+  (define-key dired-mode-map (kbd "C-x C-s") #'ignore)
+  (define-key deft-mode-map (kbd "C-x C-s") #'ignore)
+  )
 
 (use-package  org-remark
   :defer t
@@ -590,7 +691,6 @@
 (use-package dired
   :defer t
   :config
-  (define-key dired-mode-map (kbd "C-x C-s") #'ignore)
   (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
 
@@ -598,7 +698,7 @@
   :defer t
   :bind
   (("M-o" . 'ace-window))
-  
+
   :config
   (setq aw-keys '(?d ?j ?i ?w)))
 
@@ -622,10 +722,10 @@
 
 (use-package eshell
   :after esh-mode
-  :init 
+  :init
   :config
   (setq eshell-scroll-show-maximum-output nil)
-  :bind (:map 
+  :bind (:map
          eshell-mode-map
          ("<tab>" . 'completion-at-point)
          ("C-x C-s" . 'ignore)))
@@ -694,7 +794,7 @@
   :bind (
          :map company-active-map
          ("C-p" . company-select-previous)
-         ("C-n" . company-select-next)        
+         ("C-n" . company-select-next)
          ("<tab>" . company-complete-selection)
          :map company-search-map
          ("C-p" . company-select-previous)
@@ -730,12 +830,12 @@
                  (indent-tabs-mode . nil)
                  (c-basic-offset . 4)
                  (c-offsets-alist (innamespace . -))))
-  
+
   (add-to-list 'c-default-style '(c++-mode . "dianyuluo-style")))
 
 (use-package highlight-parentheses
   :ensure t
-  :config 
+  :config
   (global-highlight-parentheses-mode))
 
 
@@ -753,13 +853,13 @@
         pdf-view-mode-map
         ("j" . 'pdf-view-next-line-or-next-page)
         ("k" . 'pdf-view-previous-line-or-previous-page))
-  
+
   :config)
 
 
 (use-package ivy
   :ensure t
-  :init 
+  :init
   (ivy-mode 1)
   (setq ivy-wrap t)
   )
@@ -772,16 +872,15 @@
   (deft-recursive t)
   (deft-default-extension "org")
   (deft-strip-summary-regexp ":PROPERTIES:\n\\(.+\n\\)+:END:\n")
-  
+
   (deft-directory "~/.emacs.d/learning/emacs/org_roam/org-roam")
   :config
-  (define-key deft-mode-map (kbd "C-x C-s") #'ignore)
   (defun cm/deft-parse-title (file contents)
     (let ((begin (string-match "^#\\+[tT][iI][tT][lL][eE]: .*$" contents)))
 	  (if begin
 	      (string-trim (substring contents begin (match-end 0)) "#\\+[tT][iI][tT][lL][eE]: *" "[\n\t ]+")
 	    (deft-base-filename file))))
-  
+
   (advice-add 'deft-parse-title :override #'cm/deft-parse-title)
   (setq deft-strip-summary-regexp
 	    (concat "\\("
@@ -790,6 +889,12 @@
 		        "\\|^:PROPERTIES:\n\\(.+\n\\)+:END:\n"
 		        "\\)"))
   )
+
+;; 高亮vc diff ,性能有点问题,一般还是别开了
+;; (use-package diff-hl
+;;   :config
+;;   (global-diff-hl-mode)
+;;   )
 
 (use-package magit
   :defer t
@@ -803,7 +908,7 @@
                            org-agenda-mode-hook
                            eshell-mode-hook
                            deft-mode-hook
-                           pdf-view-mode-hook 
+                           pdf-view-mode-hook
                            helpful-mode-hook
                            help-mode-hook))
     (add-hook no-line-mode (lambda () (display-line-numbers-mode 0)))))
@@ -832,13 +937,20 @@
       (ivy-read "org roam directory: " cands
                 :action #'dian-yu-luo-convert-org-roam-dir
                 :caller 'dian-select-org-roam-directory)))
-
+  (defun dian-org-roam-node-find (&optional other-window)
+    "Find an org-roam node. See `org-roam-node-find'."
+    (interactive "P")
+    (org-roam-node-find other-window nil (lambda (node)
+                                           (= 0 (org-roam-node-level node)))))
 
   :config
   (org-roam-db-autosync-mode)
-  (setq org-roam-dailies-directory "~/.emacs.d/learning/emacs/dairy/")
+  (setq org-roam-dailies-directory "~/.emacs.d/learning/emacs/diary/")
+  (add-hook 'org-roam-capture-new-node-hook #'(lambda (&rest _)
+                                                (evil-insert 1)
+                                                (sis-set-other)))
   :bind
-  (("C-c n f" . org-roam-node-find)
+  (("C-c n f" . dian-org-roam-node-find)
    ("C-c n i" . org-roam-node-insert)
    ("C-c n r" . org-roam-node-random))
   :custom
@@ -849,12 +961,30 @@
       :unnarrowed t
       :immediate-finish t))))
 
-
+(use-package org-agenda
+  :defer t
+  :init
+  (defun org-todo-list-current-file (&optional arg)
+    ;; 获得当前文件中的所有todo项目,处理的还可以
+    (interactive "P")
+    (let ((org-agenda-files (list (buffer-file-name (current-buffer)))))
+      (if (null (car org-agenda-files))
+          (error "%s is not visiting a file" (buffer-name (current-buffer)))
+        (org-todo-list arg))))
+  :config
+  (setq org-agenda-window-setup 'only-window)
+  (defun org-agenda-done-and-archive ()
+    ;; 切换绑定快捷键,在归档的时候把todo标签去掉
+    (interactive)
+    (save-current-buffer
+      (org-agenda-todo "")
+      (org-agenda-archive)))
+  (define-key org-agenda-mode-map "$" 'org-agenda-done-and-archive)
+  (define-key org-agenda-mode-map "%" 'org-agenda-archive))
 
 (use-package org-capture
   :ensure nil
   :init
-  (add-hook 'org-capture-mode-hook 'sis-set-other)
   (add-hook 'org-capture-mode-hook 'evil-insert-state)
   :bind
   ("C-c c" . org-capture)
@@ -865,7 +995,7 @@
                                  entry
                                  (file+headline "~/.emacs.d/learning/emacs/org_agenda/gtd.org"
                                                 "Tasks")
-                                 "* TODO \t%?\n  %i\n")
+                                 "* TODO %?\n  %i\n")
                                 ("e" "Eureka"
                                  entry
                                  (file+headline "~/.emacs.d/learning/emacs/org_agenda/eureka.org"
@@ -873,29 +1003,29 @@
                                  "* TODO \t%?\n %T\n %i\n  %a")
                                 ("k" "tipoftheday"
                                  plain
-                                 (file "~/.emacs.d/learning/emacs/dairy/tipoftheday.org" )
+                                 (file "~/.emacs.d/learning/emacs/diary/tipoftheday.org" )
                                  " %?\n")
                                 ("u" "question"
                                  entry
                                  (file+headline "~/.emacs.d/learning/emacs/org_agenda/eureka.org"
                                                 "question")
-                                 "* TODO %? \?\n%T")
+                                 "* %? \?\n")
                                 ("j" "Journal"
                                  entry
                                  (file+datetree "~/.emacs.d/learning/emacs/org_agenda/journal.org")
                                  "* %?\n "))))
 
 
-(use-package org-superstar 
-  :after org 
+(use-package org-superstar
+  :after org
   :hook (org-mode . org-superstar-mode)
   :config
   (setq org-superstar-headline-bullets-list '("➲" "➱" "➶" "➠" "➢")))
 
 
 (use-package org-download
-  :defer  t 
-  :after org 
+  :defer  t
+  :after org
   :ensure t
   :config
   (setq-default org-download-image-dir "./images")
@@ -920,6 +1050,8 @@
   (defun dianyuluo-org-prettify-symbols ()
     (setq-local prettify-symbols-alist
                 '(("[fn:0]" . "⁰")
+                  ("[X]" . "🆗")
+                  ("[ ]" . "⬜")
                   ("[fn:1]" . "¹")
                   ("[fn:2]" . "²")
                   ("[fn:3]" . "³")
@@ -933,14 +1065,14 @@
   (add-hook 'org-mode-hook 'dianyuluo-org-prettify-symbols)
   ;;80个字符自动换行
   (add-hook 'org-mode-hook 'turn-on-auto-fill)
-  (add-hook 'org-mode-hook #'valign-mode)
+  ;;  (add-hook 'org-mode-hook #'valign-mode)
   (setq-default fill-column 80)
   (setq org-ellipsis "  ⇲")
   (setq org-modules nil)
   (setq org-startup-folded "showall")
   (setq org-hide-block-startup t)
   (setq org-startup-truncated nil)
-  ;;  (setq org-todo-keywords '((sequence "TODO(t)" "DONE(d!)" "|" "WAIT(w!)" "CANCELED(c!)")))
+  (setq org-todo-keywords '((sequence "TODO(t)" "DONE(d!)" "|" "WAIT(w!)" "CANCELED(c!)")))
   (setq org-tag-alist '(("wait" . ?w) ("question" . ?i) ("@home" . ?h) ("laptop" . ?l)))
   (setq org-todo-keyword-faces '(("TODO" . "red")
                                  ("DONE" . "green")
@@ -949,7 +1081,7 @@
   ;;默认执行org行内代码块不需要确认
   (setq org-confirm-babel-evaluate nil)
   (setq org-startup-indented t)
-  ;;隐藏斜体,粗体,下划线等的左右符号    
+  ;;隐藏斜体,粗体,下划线等的左右符号
   (setq org-hide-emphasis-markers t)
   ;; 保证了每次挑选tag默认只选择一个
   (setq org-fast-tag-selection-single-key t)
@@ -958,7 +1090,7 @@
   (setq org-log-refile 'time)
   (setq org-refile-targets '(("~/.emacs.d/learning/emacs/org_refile/done.org" :maxlevel . 1)
                              ("~/.emacs.d/learning/emacs/org_refile/canceled.org" :maxlevel . 1)))
-  (setq org-outline-path-complete-in-steps nil)  
+  (setq org-outline-path-complete-in-steps nil)
   (setq org-preview-latex-process-alist '((dvipng :programs ("latex" "dvipng"):description
                                                   "dvi > png"
                                                   :message "you need to install the programs: latex and dvipng."
@@ -979,7 +1111,6 @@
                    ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
     (setq org-latex-default-class "ctexart")
     (setq org-latex-compiler "xelatex"))
-  
+
   ;; 表格的形式,表格名在表格的下面
   (setq org-latex-caption-above nil)  )
-
